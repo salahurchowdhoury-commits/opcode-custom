@@ -1,0 +1,278 @@
+opcode-custom — Windows 11 Setup Guide
+========================================
+
+This guide is written in English and Bengali. It explains how a new Windows 11 user can install the prerequisites, configure their own Claude-compatible API access, and build/run the application.
+
+IMPORTANT SECURITY NOTICE
+-------------------------
+Use only your own API key or token. Do not paste a real credential into GitHub, this repository, screenshots, or chat messages. The example settings file contains placeholders only. If a key is ever exposed, revoke it immediately and issue a replacement.
+
+PART 1 — ENGLISH
+================
+
+1. Prerequisites
+----------------
+Install the following on Windows 11:
+
+A) Node.js LTS (includes npm)
+   Download: https://nodejs.org/
+   Choose the current LTS Windows installer. Accept the defaults.
+
+B) Git for Windows
+   Download: https://git-scm.com/download/win
+   Accept the default options unless you have a reason to customize them.
+
+C) Rust toolchain
+   Download rustup: https://rustup.rs/
+   Run rustup-init.exe and choose the default installation. Rust is required by Tauri.
+
+D) Microsoft C++ Build Tools
+   Download: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+   In the installer select “Desktop development with C++”. Keep the Windows SDK selected.
+
+E) WebView2 Runtime
+   Windows 11 normally includes it. If it is missing, install it from:
+   https://developer.microsoft.com/microsoft-edge/webview2/
+
+F) Claude Code CLI
+   Install Claude Code using the official Claude Code documentation and ensure the
+   `claude` command is available in PATH. Open a new PowerShell window after installing.
+
+Optional: OmniRoute
+   The app can use a local OmniRoute service. Install/configure OmniRoute separately
+   only if you need that integration. The core build does not require a personal key
+   in this repository.
+
+2. Verify the installation
+---------------------------
+Open a new PowerShell window and run:
+
+   node --version
+   npm --version
+   git --version
+   rustc --version
+   cargo --version
+   claude --version
+
+Each command should print a version. If Windows cannot find a command, close and
+reopen PowerShell, then check that the program was added to PATH.
+
+3. Get the source
+------------------
+Clone the public repository and enter it:
+
+   git clone https://github.com/salahurchowdhoury-commits/opcode-custom.git
+   cd opcode-custom
+
+If you received the source as a ZIP file, extract it to a normal work directory and
+open PowerShell in the extracted project root.
+
+4. Create your Claude Code settings
+------------------------------------
+The repository includes `settings.example.json`, which is a safe blank template.
+Copy it to the Claude Code settings path in your Windows user profile:
+
+   New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" | Out-Null
+   Copy-Item .\settings.example.json "$env:USERPROFILE\.claude\settings.json"
+   notepad "$env:USERPROFILE\.claude\settings.json"
+
+Fill in your own values:
+
+   {
+     "env": {
+       "ANTHROPIC_BASE_URL": "YOUR_PROVIDER_BASE_URL",
+       "ANTHROPIC_AUTH_TOKEN": "YOUR_OWN_API_KEY",
+       "ANTHROPIC_MODEL": "YOUR_MODEL_OR_COMBO_NAME"
+     }
+   }
+
+Use the exact base URL, token, and model/combo name required by your provider.
+Do not use someone else’s credential. Do not commit this personal settings file.
+
+5. Install JavaScript dependencies
+----------------------------------
+From the project root, run:
+
+   npm install
+
+This creates the local `node_modules` directory. It is intentionally excluded from
+Git and must be recreated on each new computer.
+
+6. Build the Windows application
+---------------------------------
+Run:
+
+   npm run tauri build
+
+Tauri compiles the frontend and Rust backend. Build artifacts are placed below:
+
+   src-tauri\target\release\
+   src-tauri\target\release\bundle\
+
+The installer, when generated, is normally inside the bundle subdirectory.
+
+7. Run during development
+--------------------------
+For frontend development:
+
+   npm run dev
+
+For the complete Tauri development window, use the Tauri CLI through npm if needed:
+
+   npm run tauri dev
+
+To check TypeScript and Rust without creating an installer:
+
+   npm run check
+
+8. Troubleshooting
+------------------
+- “node/npm is not recognized”: reinstall Node.js LTS or reopen PowerShell.
+- “cargo/rustc is not recognized”: reopen PowerShell after rustup installation.
+- Tauri linker/build errors: confirm Desktop development with C++ and the Windows SDK
+  are installed in Visual Studio Build Tools.
+- `claude` is not found: install Claude Code CLI and confirm it is on PATH.
+- Authentication errors: check the values in
+  `%USERPROFILE%\.claude\settings.json`; never put a key into source code.
+- Missing WebView2: install the Evergreen WebView2 Runtime.
+- If dependencies are stale, close running dev servers, remove `node_modules`, and
+  run `npm install` again.
+
+PART 2 — বাংলা নির্দেশনা
+=========================
+
+১. প্রয়োজনীয় সফটওয়্যার ইনস্টল করুন
+----------------------------------
+Windows 11 কম্পিউটারে নিচের সফটওয়্যারগুলো ইনস্টল করুন:
+
+ক) Node.js LTS (এর সঙ্গে npm থাকে)
+   ডাউনলোড: https://nodejs.org/
+   Windows installer-এর বর্তমান LTS সংস্করণটি ইনস্টল করুন। সাধারণ ডিফল্ট অপশন
+   গ্রহণ করুন।
+
+খ) Git for Windows
+   ডাউনলোড: https://git-scm.com/download/win
+   সাধারণত ডিফল্ট অপশনই যথেষ্ট।
+
+গ) Rust toolchain
+   ডাউনলোড: https://rustup.rs/
+   rustup-init.exe চালিয়ে Default installation নির্বাচন করুন। Tauri-এর Rust
+   backend compile করার জন্য Rust প্রয়োজন।
+
+ঘ) Microsoft C++ Build Tools
+   ডাউনলোড: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+   Installer-এ “Desktop development with C++” নির্বাচন করুন এবং Windows SDK
+   ইনস্টল থাকতে দিন।
+
+ঙ) WebView2 Runtime
+   Windows 11-এ সাধারণত এটি আগে থেকেই থাকে। না থাকলে ডাউনলোড করুন:
+   https://developer.microsoft.com/microsoft-edge/webview2/
+
+চ) Claude Code CLI
+   Claude Code-এর অফিসিয়াল নির্দেশনা অনুসরণ করে CLI ইনস্টল করুন এবং নিশ্চিত করুন
+   যে নতুন PowerShell window-তে `claude` কমান্ডটি কাজ করে।
+
+ঐচ্ছিক: OmniRoute
+   Local OmniRoute integration ব্যবহার করতে চাইলে আলাদাভাবে OmniRoute ইনস্টল ও
+   configure করুন। এই repository build করার জন্য এটি সবসময় প্রয়োজন নয়।
+
+২. ইনস্টলেশন যাচাই করুন
+------------------------
+নতুন PowerShell খুলে চালান:
+
+   node --version
+   npm --version
+   git --version
+   rustc --version
+   cargo --version
+   claude --version
+
+প্রতিটি কমান্ডের version দেখানো উচিত। কোনো কমান্ড পাওয়া না গেলে PowerShell বন্ধ
+করে আবার খুলুন এবং PATH ঠিক আছে কি না পরীক্ষা করুন।
+
+৩. Source code সংগ্রহ করুন
+---------------------------
+Public repository clone করুন:
+
+   git clone https://github.com/salahurchowdhoury-commits/opcode-custom.git
+   cd opcode-custom
+
+ZIP ফাইল পেলে সেটি extract করে project-এর root folder-এ PowerShell খুলুন।
+
+৪. Claude Code settings তৈরি করুন
+----------------------------------
+Repository-তে থাকা `settings.example.json` একটি নিরাপদ blank template। এটি আপনার
+Windows user profile-এর Claude settings path-এ কপি করুন:
+
+   New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" | Out-Null
+   Copy-Item .\settings.example.json "$env:USERPROFILE\.claude\settings.json"
+   notepad "$env:USERPROFILE\.claude\settings.json"
+
+এরপর নিজের provider-এর তথ্য বসান:
+
+   {
+     "env": {
+       "ANTHROPIC_BASE_URL": "আপনার_PROVIDER_BASE_URL",
+       "ANTHROPIC_AUTH_TOKEN": "আপনার_নিজের_API_KEY",
+       "ANTHROPIC_MODEL": "আপনার_MODEL_OR_COMBO_NAME"
+     }
+   }
+
+আপনার provider যে base URL, token এবং model/combo name দিয়েছে, সেগুলোই ব্যবহার
+করুন। অন্য কারও key ব্যবহার করবেন না। এই personal settings file কখনো GitHub-এ
+commit করবেন না।
+
+৫. JavaScript dependency ইনস্টল করুন
+------------------------------------
+Project root থেকে চালান:
+
+   npm install
+
+এতে local `node_modules` folder তৈরি হবে। এটি Git-এ রাখা হয় না, তাই নতুন
+কম্পিউটারে আবার `npm install` চালাতে হবে।
+
+৬. Windows application build করুন
+---------------------------------
+চালান:
+
+   npm run tauri build
+
+Tauri frontend ও Rust backend compile করবে। Output সাধারণত এখানে পাওয়া যাবে:
+
+   src-tauri\target\release\
+   src-tauri\target\release\bundle\
+
+Installer তৈরি হলে bundle folder-এর ভেতরে থাকবে।
+
+৭. Development mode-এ চালান
+----------------------------
+Frontend development server চালাতে:
+
+   npm run dev
+
+সম্পূর্ণ Tauri development window চালাতে:
+
+   npm run tauri dev
+
+TypeScript এবং Rust check করতে:
+
+   npm run check
+
+৮. সাধারণ সমস্যা সমাধান
+-----------------------
+- “node/npm is not recognized”: Node.js LTS পুনরায় ইনস্টল করুন অথবা PowerShell
+  নতুন করে খুলুন।
+- “cargo/rustc is not recognized”: rustup ইনস্টলের পর PowerShell পুনরায় খুলুন।
+- Tauri linker error: Visual Studio Build Tools-এ Desktop development with C++
+  এবং Windows SDK নির্বাচিত আছে কি না দেখুন।
+- `claude` পাওয়া যাচ্ছে না: Claude Code CLI ইনস্টল করে PATH পরীক্ষা করুন।
+- Authentication error: `%USERPROFILE%\.claude\settings.json`-এর তথ্য পরীক্ষা
+  করুন; source code-এর মধ্যে key লিখবেন না।
+- WebView2 সমস্যা: Evergreen WebView2 Runtime ইনস্টল করুন।
+- Dependency সমস্যা হলে চলমান dev server বন্ধ করুন, `node_modules` মুছে আবার
+  `npm install` চালান।
+
+শেষ কথা
+-------
+API key, token এবং personal settings গোপন রাখুন। কোনো credential প্রকাশ হয়ে গেলে
+সঙ্গে সঙ্গে সেটি revoke করে নতুন credential তৈরি করুন।
